@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { Star, Download, Github, ExternalLink } from 'lucide-react';
 import { Nav } from '../../../components/nav';
 import { ReviewSection } from '../../../components/review-section';
+import { CopyButton } from '../../../components/copy-button';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
@@ -86,7 +87,10 @@ export default async function ServerPage({ params }: { params: { slug: string } 
               <CardHeader><CardTitle>Installation</CardTitle></CardHeader>
               <CardContent>
                 <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm">
-                  <p className="text-gray-500 text-xs mb-2"># Install command</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-gray-500 text-xs"># Install command</p>
+                    <CopyButton text={server.installCommand ?? ''} />
+                  </div>
                   <code className="text-green-400">{server.installCommand}</code>
                 </div>
               </CardContent>
