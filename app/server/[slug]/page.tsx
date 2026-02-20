@@ -15,13 +15,22 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
   const server = servers[0];
   if (!server) return { title: 'Not Found' };
+  const url = `https://forgelink-pi.vercel.app/server/${server.slug}`;
   return {
-    title: `${server.name} — ${server.category} MCP Integration | ForgeLink`,
+    title: `${server.name} — ${server.category} Integration | ForgeLink`,
     description: server.tagline,
     openGraph: {
       title: `${server.name} | ForgeLink`,
       description: server.tagline,
       type: 'website',
+      url,
+      siteName: 'ForgeLink',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${server.name} | ForgeLink`,
+      description: server.tagline,
+      site: '@forgelink',
     },
   };
 }
