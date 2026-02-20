@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
-import { Star, Download, Search, Database, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package } from 'lucide-react';
+import { Star, Download, Search, Database, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package, X } from 'lucide-react';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Database':      <Database className="w-5 h-5 text-white" />,
@@ -45,34 +46,84 @@ type Server = {
 const CATEGORIES = ['Database', 'Development', 'Communication', 'Productivity', 'Cloud', 'Finance', 'AI & ML', 'Analytics'];
 const PROTOCOLS = ['all', 'MCP', 'OpenAI', 'LangChain', 'AutoGPT', 'Custom API'];
 
-export function BrowseClient({ servers, initialCategory }: { servers: Server[]; initialCategory?: string }) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory ?? 'all');
-  const [selectedProtocol, setSelectedProtocol] = useState('all');
+export function BrowseClient({
+  servers,
+  initialCategory = 'all',
+  initialQuery = '',
+  initialProtocol = 'all',
+}: {
+  servers: Server[];
+  initialCategory?: string;
+  initialQuery?: string;
+  initialProtocol?: string;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Count per category from server data
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedProtocol, setSelectedProtocol] = useState(initialProtocol);
+
+  // Sync state to URL without full navigation
+  const pushUrl = useCallback((q: string, cat: string, proto: string) => {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (cat !== 'all') params.set('category', cat);
+    if (proto !== 'all') params.set('protocol', proto);
+    const search = params.toString();
+    router.replace(`${pathname}${search ? '?' + search : ''}`, { scroll: false });
+  }, [router, pathname]);
+
+  const handleSearch = (val: string) => {
+    setSearchQuery(val);
+    pushUrl(val, selectedCategory, selectedProtocol);
+  };
+
+  const handleCategory = (cat: string) => {
+    const next = selectedCategory === cat ? 'all' : cat;
+    setSelectedCategory(next);
+    pushUrl(searchQuery, next, selectedProtocol);
+  };
+
+  const handleProtocol = (proto: string) => {
+    setSelectedProtocol(proto);
+    pushUrl(searchQuery, selectedCategory, proto);
+  };
+
+  const clearAll = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setSelectedProtocol('all');
+    router.replace(pathname, { scroll: false });
+  };
+
   const categoryCounts = CATEGORIES.reduce<Record<string, number>>((acc, cat) => {
     acc[cat] = servers.filter(s => s.category === cat).length;
     return acc;
   }, {});
 
   const filteredServers = servers.filter(server => {
-    const matchesSearch =
-      server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      server.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      server.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      server.name.toLowerCase().includes(q) ||
+      server.tagline.toLowerCase().includes(q) ||
+      server.description.toLowerCase().includes(q) ||
+      server.category.toLowerCase().includes(q) ||
+      server.protocol.toLowerCase().includes(q);
     const matchesCategory = selectedCategory === 'all' || server.category === selectedCategory;
     const matchesProtocol = selectedProtocol === 'all' || server.protocol === selectedProtocol;
     return matchesSearch && matchesCategory && matchesProtocol;
   });
 
+  const hasActiveFilters = searchQuery || selectedCategory !== 'all' || selectedProtocol !== 'all';
+
   return (
     <>
-      {/* Category pills with counts */}
+      {/* Category pills */}
       <div className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-5">
           <button
-            onClick={() => setSelectedCategory('all')}
+            onClick={() => handleCategory('all')}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
               selectedCategory === 'all'
                 ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -89,11 +140,10 @@ export function BrowseClient({ servers, initialCategory }: { servers: Server[]; 
 
           {CATEGORIES.map(cat => {
             const active = selectedCategory === cat;
-            const count = categoryCounts[cat] ?? 0;
             return (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(active ? 'all' : cat)}
+                onClick={() => handleCategory(cat)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                   active
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
@@ -107,14 +157,14 @@ export function BrowseClient({ servers, initialCategory }: { servers: Server[]; 
                 <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
                   active ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
                 }`}>
-                  {count}
+                  {categoryCounts[cat] ?? 0}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Search + protocol filter */}
+        {/* Search + protocol */}
         <div className="flex gap-3 flex-wrap">
           <div className="flex-1 relative min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -122,28 +172,57 @@ export function BrowseClient({ servers, initialCategory }: { servers: Server[]; 
               type="text"
               placeholder="Search integrations..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-9 pr-9"
             />
+            {searchQuery && (
+              <button
+                onClick={() => handleSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <select
             value={selectedProtocol}
-            onChange={(e) => setSelectedProtocol(e.target.value)}
+            onChange={(e) => handleProtocol(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md bg-white text-sm"
           >
             {PROTOCOLS.map(proto => (
               <option key={proto} value={proto}>{proto === 'all' ? 'All Protocols' : proto}</option>
             ))}
           </select>
+          {hasActiveFilters && (
+            <button
+              onClick={clearAll}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-500 border border-gray-200 rounded-md hover:border-red-300 hover:text-red-500 transition-colors bg-white"
+            >
+              <X className="w-3.5 h-3.5" />
+              Clear filters
+            </button>
+          )}
         </div>
 
-        <p className="text-sm text-gray-500 mt-3">
-          Showing <strong>{filteredServers.length}</strong> of <strong>{servers.length}</strong> integrations
-          {selectedCategory !== 'all' && <> in <strong>{selectedCategory}</strong></>}
-        </p>
+        {/* Result count + shareable hint */}
+        <div className="flex items-center justify-between mt-3">
+          <p className="text-sm text-gray-500">
+            Showing <strong>{filteredServers.length}</strong> of <strong>{servers.length}</strong> integrations
+            {selectedCategory !== 'all' && <> in <strong>{selectedCategory}</strong></>}
+            {searchQuery && <> matching <strong>&quot;{searchQuery}&quot;</strong></>}
+          </p>
+          {hasActiveFilters && (
+            <button
+              onClick={() => navigator.clipboard?.writeText(window.location.href)}
+              className="text-xs text-blue-500 hover:text-blue-700 underline underline-offset-2"
+            >
+              Copy shareable link
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Server grid */}
+      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredServers.map((server) => (
           <Link key={server.id} href={`/server/${server.slug}`}>
@@ -183,7 +262,8 @@ export function BrowseClient({ servers, initialCategory }: { servers: Server[]; 
       {filteredServers.length === 0 && (
         <div className="text-center py-16">
           <p className="text-gray-600 text-lg mb-1">No integrations found.</p>
-          <p className="text-gray-400 text-sm">Try adjusting your search or filters.</p>
+          <p className="text-gray-400 text-sm mb-4">Try adjusting your search or filters.</p>
+          <button onClick={clearAll} className="text-blue-600 hover:underline text-sm">Clear all filters</button>
         </div>
       )}
     </>
