@@ -170,6 +170,15 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                           <Download className="w-3 h-3" />
                           {(rel.installCount ?? 0).toLocaleString()}
                         </div>
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <Link
+                            href={`/compare/${server.slug}-vs-${rel.slug}`}
+                            className="text-xs text-blue-500 hover:text-blue-700 font-medium"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            Compare with {server.name} →
+                          </Link>
+                        </div>
                       </div>
                     </Link>
                   ))}
