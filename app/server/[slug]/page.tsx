@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { db } from '../../../lib/db';
 import { mcpServers } from '../../../lib/db/schema';
 import { eq, sql, and, ne, desc } from 'drizzle-orm';
+import { serverTags } from '../../../lib/db/schema';
 import type { Metadata } from 'next';
 import { Badge } from '../../../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
@@ -13,6 +14,7 @@ import { CopyButton } from '../../../components/copy-button';
 import { ClaimButton } from '../../../components/claim-button';
 import { InstallBlock } from '../../../components/install-block';
 import { BadgeEmbed } from '../../../components/badge-embed';
+import { TagPills } from '../../../components/tag-components';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
@@ -54,6 +56,11 @@ async function getRelated(category: string, currentId: string) {
     .limit(3);
 }
 
+async function getTags(serverId: string) {
+  const rows = await db.select().from(serverTags).where(eq(serverTags.serverId, serverId));
+  return rows.map(r => r.tag);
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
   'Database':      'from-blue-500 to-blue-700',
   'Cloud':         'from-purple-500 to-purple-700',
@@ -76,6 +83,7 @@ export default async function ServerPage({ params }: { params: { slug: string } 
       .where(eq(mcpServers.id, server.id))
       .catch(() => {}),
   ]);
+  const tags = await getTags(server.id);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,6 +104,11 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                 <Badge variant="outline">{server.protocol}</Badge>
               </div>
               <p className="text-lg text-gray-500 mb-3">{server.tagline}</p>
+              {tags.length > 0 && (
+                <div className="mb-3">
+                  <TagPills tags={tags} />
+                </div>
+              )}
               <div className="flex items-center gap-6 text-sm text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />

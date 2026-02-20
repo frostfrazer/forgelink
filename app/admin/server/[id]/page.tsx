@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../../components
 import { Button } from '../../../../components/ui/button';
 import { Badge } from '../../../../components/ui/badge';
 import { sendApprovalEmail } from '../../../../lib/email';
+import { TagEditor } from '../../../../components/tag-components';
 
 async function getServer(id: string) {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.id, id));
@@ -176,6 +177,14 @@ export default async function AdminServerPage({ params }: { params: { id: string
               </form>
             </CardContent>
           </Card>
+          {/* Tags */}
+          <Card className="md:col-span-2">
+            <CardHeader><CardTitle>Tags / Keywords</CardTitle></CardHeader>
+            <CardContent>
+              <TagEditor serverId={server.id} />
+            </CardContent>
+          </Card>
+
         </div>
       </div>
     </div>

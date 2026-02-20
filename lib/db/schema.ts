@@ -73,6 +73,6 @@ export const waitlist = pgTable('waitlist', {
 
 export const serverTags = pgTable('server_tags', {
   id: uuid('id').defaultRandom().primaryKey(),
-  serverId: uuid('server_id').notNull(),
+  serverId: uuid('server_id').notNull().references(() => mcpServers.id, { onDelete: 'cascade' }),
   tag: varchar('tag', { length: 50 }).notNull(),
 });

@@ -1,5 +1,5 @@
 import { db } from '../../lib/db';
-import { mcpServers } from '../../lib/db/schema';
+import { mcpServers, serverTags } from '../../lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { BrowseClient } from './client-page';
 import { Nav } from '../../components/nav';
@@ -44,21 +44,31 @@ export async function generateMetadata({
 }
 
 async function getServers() {
-  return await db.select().from(mcpServers)
+  const servers = await db.select().from(mcpServers)
     .where(eq(mcpServers.status, 'approved'))
     .orderBy(desc(mcpServers.viewCount))
     .limit(100);
+
+  // Fetch all tags and attach to servers
+  const allTags = await db.select().from(serverTags);
+  const tagMap: Record<string, string[]> = {};
+  for (const t of allTags) {
+    if (!tagMap[t.serverId]) tagMap[t.serverId] = [];
+    tagMap[t.serverId].push(t.tag);
+  }
+  return servers.map(s => ({ ...s, tags: tagMap[s.id] ?? [] }));
 }
 
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: { category?: string; q?: string; protocol?: string };
+  searchParams: { category?: string; q?: string; protocol?: string; tag?: string };
 }) {
   const servers = await getServers();
   const initialCategory = searchParams.category ?? 'all';
   const initialQuery = searchParams.q ?? '';
   const initialProtocol = searchParams.protocol ?? 'all';
+  const initialTag = searchParams.tag ?? '';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,6 +85,7 @@ export default async function BrowsePage({
           initialCategory={initialCategory}
           initialQuery={initialQuery}
           initialProtocol={initialProtocol}
+          initialTag={initialTag}
         />
       </div>
     </div>
