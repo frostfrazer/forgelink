@@ -94,6 +94,9 @@ export default async function AdminPage() {
           <Link href="/browse">
             <Button variant="outline" size="sm">View Marketplace</Button>
           </Link>
+          <Link href="/admin/waitlist">
+            <Button variant="outline" size="sm">📧 Waitlist ({stats.waitlistCount})</Button>
+          </Link>
         </div>
       </div>
 
