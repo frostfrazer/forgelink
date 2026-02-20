@@ -33,6 +33,8 @@ export const mcpServers = pgTable('mcp_servers', {
   claimToken: varchar('claim_token', { length: 255 }),
   claimedAt: timestamp('claimed_at'),
   ownerEmail: varchar('owner_email', { length: 255 }),
+  weeklyViewSnapshot: integer('weekly_view_snapshot').default(0),
+  weeklySnapshotAt: timestamp('weekly_snapshot_at'),
 });
 
 export const categories = pgTable('categories', {

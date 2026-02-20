@@ -4,10 +4,11 @@ import { Badge } from '../components/ui/badge';
 import { Database, Zap, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package, Search, Rocket, Star, Download, ArrowRight, Shield, CheckCircle } from 'lucide-react';
 import { db } from '../lib/db';
 import { mcpServers } from '../lib/db/schema';
-import { eq, and, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count, sql } from 'drizzle-orm';
 import { Nav } from '../components/nav';
 import { WaitlistForm } from '../components/waitlist-form';
 import { FeaturedCarousel } from '../components/featured-carousel';
+import { TrendingSection } from '../components/trending-section';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Database':      <Database className="w-6 h-6 text-white" />,
@@ -47,6 +48,29 @@ async function getFeaturedServers() {
   return combined.slice(0, 6);
 }
 
+async function getTrendingServers() {
+  const servers = await db.select({
+    id: mcpServers.id,
+    name: mcpServers.name,
+    slug: mcpServers.slug,
+    tagline: mcpServers.tagline,
+    category: mcpServers.category,
+    ratingAvg: mcpServers.ratingAvg,
+    isVerified: mcpServers.isVerified,
+    viewCount: mcpServers.viewCount,
+    weeklyViewSnapshot: mcpServers.weeklyViewSnapshot,
+  })
+    .from(mcpServers)
+    .where(eq(mcpServers.status, 'approved'))
+    .orderBy(desc(sql`${mcpServers.viewCount} - COALESCE(${mcpServers.weeklyViewSnapshot}, 0)`))
+    .limit(6);
+
+  return servers.map(s => ({
+    ...s,
+    weeklyGrowth: (s.viewCount ?? 0) - (s.weeklyViewSnapshot ?? 0),
+  }));
+}
+
 async function getTotalCount() {
   const result = await db.select({ count: count() }).from(mcpServers)
     .where(eq(mcpServers.status, 'approved'));
@@ -54,9 +78,10 @@ async function getTotalCount() {
 }
 
 export default async function Home() {
-  const [featured, total] = await Promise.all([
+  const [featured, total, trending] = await Promise.all([
     getFeaturedServers(),
     getTotalCount(),
+    getTrendingServers(),
   ]);
 
   const categories = [
@@ -129,6 +154,9 @@ export default async function Home() {
           <FeaturedCarousel servers={featured} />
         </div>
       </section>
+
+      {/* Trending this week */}
+      <TrendingSection servers={trending} />
 
       {/* Categories */}
       <section className="py-16 bg-gray-50">
