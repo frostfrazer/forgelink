@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -8,7 +9,10 @@ import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 
+import { Nav } from '../../components/nav';
+
 export default function SubmitPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     tagline: '',
@@ -22,7 +26,6 @@ export default function SubmitPage() {
     authorEmail: '',
     preferredTier: 'early-bird',
   });
-  const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,23 +42,7 @@ export default function SubmitPage() {
       const data = await response.json();
       
       if (data.success) {
-        setSubmitted(true);
-        setTimeout(() => {
-          setSubmitted(false);
-          setFormData({
-            name: '',
-            tagline: '',
-            description: '',
-            category: 'Database',
-            protocol: 'MCP',
-            githubUrl: '',
-            npmPackage: '',
-            installCommand: '',
-            authorName: '',
-            authorEmail: '',
-            preferredTier: 'early-bird',
-          });
-        }, 5000);
+        router.push('/submit/success');
       } else {
         alert('Failed to submit. Please try again.');
       }
@@ -76,36 +63,16 @@ export default function SubmitPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Nav />
       <div className="bg-white border-b">
         <div className="max-w-3xl mx-auto px-4 py-12">
           <h1 className="text-4xl font-bold mb-2">Submit Your Integration</h1>
-          <p className="text-gray-600">Share your AI agent integration with 5,000+ developers</p>
+          <p className="text-gray-600">Share your AI agent integration with thousands of developers</p>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-12">
-        {submitted ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold mb-2">Submission Received!</h2>
-                <p className="text-gray-600 mb-4">
-                  We will review your integration and contact you within 24 hours.
-                </p>
-                <div className="bg-blue-50 p-4 rounded-lg text-sm text-left max-w-md mx-auto">
-                  <p className="font-semibold mb-2">What happens next:</p>
-                  <ol className="space-y-1 text-gray-700">
-                    <li>1. We review your submission</li>
-                    <li>2. You receive an email with next steps</li>
-                    <li>3. Your integration goes live on ForgeLink</li>
-                  </ol>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
             <Card>
               <CardHeader>
                 <CardTitle>Integration Details</CardTitle>
@@ -323,7 +290,6 @@ export default function SubmitPage() {
               </CardContent>
             </Card>
           </form>
-        )}
       </div>
     </div>
   );

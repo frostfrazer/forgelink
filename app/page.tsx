@@ -4,29 +4,29 @@ import { Badge } from '../components/ui/badge';
 import { Database, Zap, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package, Search, Rocket, Star, Download, ArrowRight, Shield, CheckCircle } from 'lucide-react';
 import { db } from '../lib/db';
 import { mcpServers } from '../lib/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, count } from 'drizzle-orm';
 import { Nav } from '../components/nav';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'Database':       <Database className="w-6 h-6 text-white" />,
-  'Cloud':          <Cloud className="w-6 h-6 text-white" />,
-  'Communication':  <MessageSquare className="w-6 h-6 text-white" />,
-  'Development':    <Code2 className="w-6 h-6 text-white" />,
-  'Analytics':      <BarChart2 className="w-6 h-6 text-white" />,
-  'Finance':        <DollarSign className="w-6 h-6 text-white" />,
-  'AI & ML':        <Bot className="w-6 h-6 text-white" />,
-  'Productivity':   <Package className="w-6 h-6 text-white" />,
+  'Database':      <Database className="w-6 h-6 text-white" />,
+  'Cloud':         <Cloud className="w-6 h-6 text-white" />,
+  'Communication': <MessageSquare className="w-6 h-6 text-white" />,
+  'Development':   <Code2 className="w-6 h-6 text-white" />,
+  'Analytics':     <BarChart2 className="w-6 h-6 text-white" />,
+  'Finance':       <DollarSign className="w-6 h-6 text-white" />,
+  'AI & ML':       <Bot className="w-6 h-6 text-white" />,
+  'Productivity':  <Package className="w-6 h-6 text-white" />,
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Database':       'from-blue-500 to-blue-700',
-  'Cloud':          'from-purple-500 to-purple-700',
-  'Communication':  'from-green-500 to-green-700',
-  'Development':    'from-gray-600 to-gray-800',
-  'Analytics':      'from-orange-500 to-orange-700',
-  'Finance':        'from-emerald-500 to-emerald-700',
-  'AI & ML':        'from-pink-500 to-pink-700',
-  'Productivity':   'from-yellow-500 to-yellow-700',
+  'Database':      'from-blue-500 to-blue-700',
+  'Cloud':         'from-purple-500 to-purple-700',
+  'Communication': 'from-green-500 to-green-700',
+  'Development':   'from-gray-600 to-gray-800',
+  'Analytics':     'from-orange-500 to-orange-700',
+  'Finance':       'from-emerald-500 to-emerald-700',
+  'AI & ML':       'from-pink-500 to-pink-700',
+  'Productivity':  'from-yellow-500 to-yellow-700',
 };
 
 async function getFeaturedServers() {
@@ -40,23 +40,33 @@ async function getTopServers() {
   return db.select().from(mcpServers)
     .where(eq(mcpServers.status, 'approved'))
     .orderBy(desc(mcpServers.installCount))
-    .limit(6);
+    .limit(3);
+}
+
+async function getTotalCount() {
+  const result = await db.select({ count: count() }).from(mcpServers)
+    .where(eq(mcpServers.status, 'approved'));
+  return result[0]?.count ?? 0;
 }
 
 export default async function Home() {
-  const [featured, top] = await Promise.all([getFeaturedServers(), getTopServers()]);
+  const [featured, top, total] = await Promise.all([
+    getFeaturedServers(),
+    getTopServers(),
+    getTotalCount(),
+  ]);
 
-  const displayServers = featured.length >= 3 ? featured : top.slice(0, 3);
+  const displayServers = featured.length >= 3 ? featured : top;
 
   const categories = [
-    { icon: 'Database', name: 'Database', color: 'from-blue-500 to-blue-700', href: '/browse?category=Database' },
-    { icon: 'Development', name: 'Development', color: 'from-gray-600 to-gray-800', href: '/browse?category=Development' },
-    { icon: 'Productivity', name: 'Productivity', color: 'from-yellow-500 to-yellow-700', href: '/browse?category=Productivity' },
-    { icon: 'Cloud', name: 'Cloud', color: 'from-purple-500 to-purple-700', href: '/browse?category=Cloud' },
-    { icon: 'Communication', name: 'Communication', color: 'from-green-500 to-green-700', href: '/browse?category=Communication' },
-    { icon: 'Finance', name: 'Finance', color: 'from-emerald-500 to-emerald-700', href: '/browse?category=Finance' },
-    { icon: 'AI & ML', name: 'AI & ML', color: 'from-pink-500 to-pink-700', href: '/browse?category=AI+%26+ML' },
-    { icon: 'Analytics', name: 'Analytics', color: 'from-orange-500 to-orange-700', href: '/browse?category=Analytics' },
+    { icon: 'Database',      name: 'Database',      color: 'from-blue-500 to-blue-700',    href: '/browse?category=Database' },
+    { icon: 'Development',   name: 'Development',   color: 'from-gray-600 to-gray-800',    href: '/browse?category=Development' },
+    { icon: 'Productivity',  name: 'Productivity',  color: 'from-yellow-500 to-yellow-700',href: '/browse?category=Productivity' },
+    { icon: 'Cloud',         name: 'Cloud',         color: 'from-purple-500 to-purple-700',href: '/browse?category=Cloud' },
+    { icon: 'Communication', name: 'Communication', color: 'from-green-500 to-green-700',  href: '/browse?category=Communication' },
+    { icon: 'Finance',       name: 'Finance',       color: 'from-emerald-500 to-emerald-700', href: '/browse?category=Finance' },
+    { icon: 'AI & ML',       name: 'AI & ML',       color: 'from-pink-500 to-pink-700',    href: '/browse?category=AI+%26+ML' },
+    { icon: 'Analytics',     name: 'Analytics',     color: 'from-orange-500 to-orange-700',href: '/browse?category=Analytics' },
   ];
 
   return (
@@ -67,7 +77,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-white py-20 sm:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200 text-sm px-4 py-1">
-            ðŸ”¥ MCP Â· OpenAI GPT Actions Â· LangChain Â· AutoGPT
+            MCP · OpenAI GPT Actions · LangChain · AutoGPT
           </Badge>
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-gray-900">
             The AI Agent
@@ -92,9 +102,8 @@ export default async function Home() {
               </Button>
             </Link>
           </div>
-          {/* Stats */}
           <div className="flex justify-center gap-12 mt-12 flex-wrap">
-            {[['15+', 'Integrations'], ['5K+', 'Developers'], ['8', 'Categories'], ['Free', 'to List']].map(([val, label]) => (
+            {[[`${total}+`, 'Integrations'], ['8', 'Categories'], ['MCP', 'Protocol'], ['Free', 'to List']].map(([val, label]) => (
               <div key={label} className="text-center">
                 <p className="text-3xl font-bold text-blue-600">{val}</p>
                 <p className="text-sm text-gray-500 mt-1">{label}</p>
@@ -110,7 +119,7 @@ export default async function Home() {
           <div className="flex justify-between items-end mb-10">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {featured.length >= 3 ? 'â­ Featured Integrations' : 'ðŸ”¥ Most Popular'}
+                {featured.length >= 3 ? 'Featured Integrations' : 'Most Popular'}
               </h2>
               <p className="text-gray-500">Trusted by thousands of AI developers</p>
             </div>
@@ -127,15 +136,21 @@ export default async function Home() {
                       {CATEGORY_ICONS[server.category] ?? <Zap className="w-6 h-6 text-white" />}
                     </div>
                     <div className="flex gap-1">
-                      {server.isVerified && <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">âœ“ Verified</span>}
-                      {server.isFeatured && <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full">â˜… Featured</span>}
+                      {server.isVerified && <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">Verified</span>}
+                      {server.isFeatured && <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full">Featured</span>}
                     </div>
                   </div>
                   <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{server.name}</h3>
                   <p className="text-sm text-gray-500 mb-4 line-clamp-2">{server.tagline}</p>
                   <div className="flex items-center gap-4 text-xs text-gray-400">
-                    <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />{server.ratingAvg}</span>
-                    <span className="flex items-center gap-1"><Download className="w-3 h-3" />{(server.installCount ?? 0).toLocaleString()}</span>
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      {server.ratingAvg}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Download className="w-3 h-3" />
+                      {(server.installCount ?? 0).toLocaleString()}
+                    </span>
                     <span className="bg-gray-100 px-2 py-0.5 rounded">{server.category}</span>
                   </div>
                 </div>
@@ -196,7 +211,7 @@ export default async function Home() {
       <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-800">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Built an MCP server or AI integration?</h2>
-          <p className="text-blue-100 text-xl mb-8">Share it with 5,000+ developers. First 10 listings get a free Verified badge.</p>
+          <p className="text-blue-100 text-xl mb-8">Share it with thousands of developers. First 10 listings get a free Verified badge.</p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/submit">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 h-12 text-base font-semibold">
@@ -238,7 +253,8 @@ export default async function Home() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/browse?category=Database" className="hover:text-white">Database</Link></li>
                 <li><Link href="/browse?category=Development" className="hover:text-white">Development</Link></li>
-                <li><Link href="/browse?category=Productivity" className="hover:text-white">Productivity</Link></li>
+                <li><Link href="/browse?category=Analytics" className="hover:text-white">Analytics</Link></li>
+                <li><Link href="/browse?category=AI+%26+ML" className="hover:text-white">AI & ML</Link></li>
               </ul>
             </div>
             <div>
@@ -246,11 +262,12 @@ export default async function Home() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/auth/signin" className="hover:text-white">Sign In</Link></li>
                 <li><Link href="/admin" className="hover:text-white">Admin</Link></li>
+                <li><Link href="/pricing" className="hover:text-white">Pricing</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-sm text-center">
-            Â© 2025 ForgeLink. Built for the agentic future. ðŸ”—
+            &copy; 2025 ForgeLink. Built for the agentic future.
           </div>
         </div>
       </footer>
