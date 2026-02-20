@@ -7,6 +7,7 @@ import { mcpServers } from '../lib/db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
 import { Nav } from '../components/nav';
 import { WaitlistForm } from '../components/waitlist-form';
+import { FeaturedCarousel } from '../components/featured-carousel';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Database':      <Database className="w-6 h-6 text-white" />,
@@ -31,17 +32,19 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 async function getFeaturedServers() {
-  return db.select().from(mcpServers)
+  const featured = await db.select().from(mcpServers)
     .where(and(eq(mcpServers.status, 'approved'), eq(mcpServers.isFeatured, true)))
     .orderBy(desc(mcpServers.viewCount))
-    .limit(3);
-}
-
-async function getTopServers() {
-  return db.select().from(mcpServers)
+    .limit(6);
+  if (featured.length >= 3) return featured;
+  // Pad with top by installs if not enough featured
+  const top = await db.select().from(mcpServers)
     .where(eq(mcpServers.status, 'approved'))
     .orderBy(desc(mcpServers.installCount))
-    .limit(3);
+    .limit(6);
+  const ids = new Set(featured.map(s => s.id));
+  const combined = [...featured, ...top.filter(s => !ids.has(s.id))];
+  return combined.slice(0, 6);
 }
 
 async function getTotalCount() {
@@ -51,13 +54,10 @@ async function getTotalCount() {
 }
 
 export default async function Home() {
-  const [featured, top, total] = await Promise.all([
+  const [featured, total] = await Promise.all([
     getFeaturedServers(),
-    getTopServers(),
     getTotalCount(),
   ]);
-
-  const displayServers = featured.length >= 3 ? featured : top;
 
   const categories = [
     { icon: 'Database',      name: 'Database',      color: 'from-blue-500 to-blue-700',    href: '/browse?category=Database' },
@@ -114,50 +114,19 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Featured / Top Servers */}
+      {/* Featured carousel */}
       <section className="py-16 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-10">
+          <div className="flex justify-between items-end mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {featured.length >= 3 ? 'Featured Integrations' : 'Most Popular'}
-              </h2>
-              <p className="text-gray-500">Trusted by thousands of AI developers</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-1">Featured Integrations</h2>
+              <p className="text-gray-500">Handpicked by the ForgeLink team</p>
             </div>
-            <Link href="/browse" className="flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-700">
+            <Link href="/browse" className="flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-700 text-sm">
               View all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {displayServers.map(server => (
-              <Link key={server.id} href={`/server/${server.slug}`}>
-                <div className="border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-200 transition-all group">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${CATEGORY_COLORS[server.category] ?? 'from-blue-500 to-blue-700'} flex items-center justify-center`}>
-                      {CATEGORY_ICONS[server.category] ?? <Zap className="w-6 h-6 text-white" />}
-                    </div>
-                    <div className="flex gap-1">
-                      {server.isVerified && <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">Verified</span>}
-                      {server.isFeatured && <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full">Featured</span>}
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{server.name}</h3>
-                  <p className="text-sm text-gray-500 mb-4 line-clamp-2">{server.tagline}</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      {server.ratingAvg}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Download className="w-3 h-3" />
-                      {(server.installCount ?? 0).toLocaleString()}
-                    </span>
-                    <span className="bg-gray-100 px-2 py-0.5 rounded">{server.category}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <FeaturedCarousel servers={featured} />
         </div>
       </section>
 

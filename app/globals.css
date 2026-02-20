@@ -134,3 +134,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes grow {
+  from { width: 0% }
+  to   { width: 100% }
+}
