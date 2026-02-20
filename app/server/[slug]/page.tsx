@@ -11,6 +11,7 @@ import { Nav } from '../../../components/nav';
 import { ReviewSection } from '../../../components/review-section';
 import { CopyButton } from '../../../components/copy-button';
 import { ClaimButton } from '../../../components/claim-button';
+import { InstallBlock } from '../../../components/install-block';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
@@ -129,13 +130,11 @@ export default async function ServerPage({ params }: { params: { slug: string } 
             <Card>
               <CardHeader><CardTitle>Installation</CardTitle></CardHeader>
               <CardContent>
-                <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-gray-500 text-xs"># Install command</p>
-                    <CopyButton text={server.installCommand ?? ''} />
-                  </div>
-                  <code className="text-green-400">{server.installCommand}</code>
-                </div>
+                <InstallBlock
+                  command={server.installCommand ?? ''}
+                  serverId={server.id}
+                  initialCount={server.installCount ?? 0}
+                />
               </CardContent>
             </Card>
 

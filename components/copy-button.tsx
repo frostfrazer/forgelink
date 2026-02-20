@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text, onCopy }: { text: string; onCopy?: () => void }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
+      onCopy?.();
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers
@@ -20,6 +21,7 @@ export function CopyButton({ text }: { text: string }) {
       document.execCommand('copy');
       document.body.removeChild(el);
       setCopied(true);
+      onCopy?.();
       setTimeout(() => setCopied(false), 2000);
     }
   };
