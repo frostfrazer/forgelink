@@ -175,7 +175,6 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                           <Link
                             href={`/compare/${server.slug}-vs-${rel.slug}`}
                             className="text-xs text-blue-500 hover:text-blue-700 font-medium"
-                            onClick={e => e.stopPropagation()}
                           >
                             Compare with {server.name} →
                           </Link>
