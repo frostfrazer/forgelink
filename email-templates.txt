@@ -1,0 +1,109 @@
+========================================
+FORGELINK EMAIL TEMPLATES
+========================================
+
+-------------------
+TEMPLATE 1: EARLY BIRD (FREE)
+-------------------
+Subject: ✅ Your MCP Server is APPROVED! (Early Bird)
+
+Hi [Name],
+
+Great news! Your MCP server "[Server Name]" has been approved and is now LIVE on ForgeLink!
+
+🎉 As one of our first 10 submissions, you got:
+✓ FREE Verified badge
+✓ Priority placement
+✓ Live immediately
+
+View your server: https://forgelink-pi.vercel.app/server/[slug]
+
+Want even more visibility? Upgrade to Featured ($199/mo) for:
+- Top of browse page
+- Homepage placement
+- Analytics dashboard
+
+Reply if interested!
+
+Best,
+ForgeLink Team
+
+-------------------
+TEMPLATE 2: VERIFIED ($99)
+-------------------
+Subject: Your MCP Server - Ready to Go Live!
+
+Hi [Name],
+
+Thanks for submitting "[Server Name]" to ForgeLink!
+
+Your server looks great and is ready for approval. 
+
+To activate your VERIFIED listing ($99 one-time):
+
+✓ Verified badge
+✓ Priority in search
+✓ Live within 24 hours
+
+Payment options:
+- PayPal: your-paypal@email.com
+- Venmo: @YourVenmo
+- Bank transfer: [Details]
+
+Once payment is received, I'll activate your listing immediately.
+
+Alternatively, you can wait for free review (7-14 days, no badge).
+
+Let me know how you'd like to proceed!
+
+Best,
+ForgeLink Team
+
+-------------------
+TEMPLATE 3: FREE REVIEW (7-14 days)
+-------------------
+Subject: Your MCP Server Submission Received
+
+Hi [Name],
+
+Thanks for submitting "[Server Name]" to ForgeLink!
+
+Your submission is in our review queue. Free listings are reviewed within 7-14 days.
+
+Want to go live faster with a verified badge?
+- Verified: $99 one-time (live in 24hrs)
+- Featured: $199/month (top placement)
+
+Reply "UPGRADE" if you'd like to fast-track your listing!
+
+Best,
+ForgeLink Team
+
+-------------------
+TEMPLATE 4: UPSELL TO FEATURED
+-------------------
+Subject: Boost Your MCP Server Visibility
+
+Hi [Name],
+
+Your server "[Server Name]" is doing great on ForgeLink!
+
+Current stats:
+- Views: [X]
+- Installs: [Y]
+
+Want 10x more visibility? Upgrade to FEATURED:
+
+🌟 Featured Benefits ($199/month):
+- Top of browse page
+- Homepage placement  
+- 10x more views
+- Analytics dashboard
+- Priority support
+
+First month: $149 (25% off)
+
+Interested? Reply and I'll set it up today!
+
+Best,
+ForgeLink Team
