@@ -12,6 +12,7 @@ import { ReviewSection } from '../../../components/review-section';
 import { CopyButton } from '../../../components/copy-button';
 import { ClaimButton } from '../../../components/claim-button';
 import { InstallBlock } from '../../../components/install-block';
+import { BadgeEmbed } from '../../../components/badge-embed';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
@@ -247,6 +248,9 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                 ✓ Listing claimed by owner
               </div>
             )}
+
+            {/* Badge embed */}
+            <BadgeEmbed slug={server.slug} name={server.name} />
           </div>
         </div>
       </div>
