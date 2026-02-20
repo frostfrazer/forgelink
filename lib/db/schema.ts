@@ -30,6 +30,9 @@ export const mcpServers = pgTable('mcp_servers', {
   isFeatured: boolean('is_featured').default(false).notNull(),
   
   status: varchar('status', { length: 50 }).default('pending'),
+  claimToken: varchar('claim_token', { length: 255 }),
+  claimedAt: timestamp('claimed_at'),
+  ownerEmail: varchar('owner_email', { length: 255 }),
 });
 
 export const categories = pgTable('categories', {

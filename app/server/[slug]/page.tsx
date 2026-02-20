@@ -10,6 +10,7 @@ import { Star, Download, Github, ExternalLink } from 'lucide-react';
 import { Nav } from '../../../components/nav';
 import { ReviewSection } from '../../../components/review-section';
 import { CopyButton } from '../../../components/copy-button';
+import { ClaimButton } from '../../../components/claim-button';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.slug, params.slug));
@@ -226,6 +227,16 @@ export default async function ServerPage({ params }: { params: { slug: string } 
                 >
                   View Plans →
                 </a>
+              </div>
+            )}
+
+            {/* Claim listing */}
+            {!server.claimedAt && (
+              <ClaimButton serverId={server.id} serverName={server.name} />
+            )}
+            {server.claimedAt && (
+              <div className="text-center text-xs text-gray-400 py-2">
+                ✓ Listing claimed by owner
               </div>
             )}
           </div>
