@@ -1,5 +1,5 @@
 import { db } from '../../lib/db';
-import { mcpServers } from '../../lib/db/schema';
+import { mcpServers, waitlist } from '../../lib/db/schema';
 import { desc, sum, eq } from 'drizzle-orm';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
@@ -19,6 +19,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 async function getDashboardData() {
   const all = await db.select().from(mcpServers);
+  const waitlistEntries = await db.select().from(waitlist);
   const approved = all.filter(s => s.status === 'approved');
 
   // Category breakdown
@@ -67,6 +68,7 @@ async function getDashboardData() {
       totalInstalls,
       totalRatings,
       avgRating,
+      waitlistCount: waitlistEntries.length,
     },
     categories,
     topByViews,
@@ -116,12 +118,13 @@ export default async function AdminPage() {
         </div>
 
         {/* Engagement KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: 'Total Views', value: stats.totalViews.toLocaleString(), icon: '👁' },
             { label: 'Total Installs', value: stats.totalInstalls.toLocaleString(), icon: '⬇️' },
             { label: 'Total Reviews', value: stats.totalRatings.toLocaleString(), icon: '⭐' },
             { label: 'Avg Rating', value: stats.avgRating, icon: '📊' },
+            { label: 'Waitlist', value: stats.waitlistCount.toLocaleString(), icon: '📧' },
           ].map(s => (
             <Card key={s.label}>
               <CardContent className="pt-5 pb-4">

@@ -6,6 +6,7 @@ import { db } from '../lib/db';
 import { mcpServers } from '../lib/db/schema';
 import { eq, and, desc, count } from 'drizzle-orm';
 import { Nav } from '../components/nav';
+import { WaitlistForm } from '../components/waitlist-form';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Database':      <Database className="w-6 h-6 text-white" />,
@@ -223,6 +224,22 @@ export default async function Home() {
                 View Pricing
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Waitlist */}
+      <section className="py-16 bg-gray-900">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <p className="text-blue-400 text-sm font-semibold uppercase tracking-widest mb-3">Stay in the loop</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+            Get notified about new integrations
+          </h2>
+          <p className="text-gray-400 mb-8">
+            New MCP servers, GPT Actions, and LangChain tools added weekly. No spam, unsubscribe anytime.
+          </p>
+          <div className="flex justify-center">
+            <WaitlistForm source="homepage-footer" dark />
           </div>
         </div>
       </section>

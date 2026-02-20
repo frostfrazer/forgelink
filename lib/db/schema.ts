@@ -62,6 +62,13 @@ export const profiles = pgTable('profiles', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export const waitlist = pgTable('waitlist', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  source: varchar('source', { length: 100 }).default('homepage'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const serverTags = pgTable('server_tags', {
   id: uuid('id').defaultRandom().primaryKey(),
   serverId: uuid('server_id').notNull(),
