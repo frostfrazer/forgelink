@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
 
 export default function PaymentSuccessPage() {
   return (
@@ -8,7 +8,7 @@ export default function PaymentSuccessPage() {
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <div className="text-center py-8">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="text-6xl mb-4">ðŸŽ‰</div>
             <h1 className="text-3xl font-bold mb-2">Payment Successful!</h1>
             <p className="text-gray-600 mb-6">
               Your integration has been upgraded successfully!
@@ -18,9 +18,9 @@ export default function PaymentSuccessPage() {
                 What's now active:
               </p>
               <ul className="text-green-700 space-y-1">
-                <li>✅ Verified badge on your listing</li>
-                <li>✅ Priority placement in search</li>
-                <li>✅ Featured in verified section</li>
+                <li>âœ… Verified badge on your listing</li>
+                <li>âœ… Priority placement in search</li>
+                <li>âœ… Featured in verified section</li>
               </ul>
             </div>
             <div className="space-y-3">

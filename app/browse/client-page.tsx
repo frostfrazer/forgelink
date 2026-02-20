@@ -1,32 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useSearchParams } from 'next/navigation';
+
+// UI imports using relative paths as fallback
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Input } from '../../components/ui/input';
 import { Star, Download, Search, Database, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package } from 'lucide-react';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'Database':       <Database className="w-6 h-6 text-white" />,
-  'Cloud':          <Cloud className="w-6 h-6 text-white" />,
-  'Communication':  <MessageSquare className="w-6 h-6 text-white" />,
-  'Development':    <Code2 className="w-6 h-6 text-white" />,
-  'Analytics':      <BarChart2 className="w-6 h-6 text-white" />,
-  'Finance':        <DollarSign className="w-6 h-6 text-white" />,
-  'AI & ML':        <Bot className="w-6 h-6 text-white" />,
-  'Productivity':   <Package className="w-6 h-6 text-white" />,
+  'Database':      <Database className="w-6 h-6 text-white" />,
+  'Cloud':         <Cloud className="w-6 h-6 text-white" />,
+  'Communication': <MessageSquare className="w-6 h-6 text-white" />,
+  'Development':   <Code2 className="w-6 h-6 text-white" />,
+  'Analytics':     <BarChart2 className="w-6 h-6 text-white" />,
+  'Finance':       <DollarSign className="w-6 h-6 text-white" />,
+  'AI & ML':       <Bot className="w-6 h-6 text-white" />,
+  'Productivity':  <Package className="w-6 h-6 text-white" />,
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Database':       'from-blue-500 to-blue-700',
-  'Cloud':          'from-purple-500 to-purple-700',
-  'Communication':  'from-green-500 to-green-700',
-  'Development':    'from-gray-600 to-gray-800',
-  'Analytics':      'from-orange-500 to-orange-700',
-  'Finance':        'from-emerald-500 to-emerald-700',
-  'AI & ML':        'from-pink-500 to-pink-700',
-  'Productivity':   'from-yellow-500 to-yellow-700',
+  'Database':      'from-blue-500 to-blue-700',
+  'Cloud':         'from-purple-500 to-purple-700',
+  'Communication': 'from-green-500 to-green-700',
+  'Development':   'from-gray-600 to-gray-800',
+  'Analytics':     'from-orange-500 to-orange-700',
+  'Finance':       'from-emerald-500 to-emerald-700',
+  'AI & ML':       'from-pink-500 to-pink-700',
+  'Productivity':  'from-yellow-500 to-yellow-700',
 };
 
 type Server = {
@@ -42,18 +45,18 @@ type Server = {
   isVerified: boolean | null;
 };
 
-export function BrowseClient({ servers }: { servers: Server[] }) {
+export function BrowseClient({ servers, initialCategory }: { servers: Server[]; initialCategory?: string }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory ?? 'all');
   const [selectedProtocol, setSelectedProtocol] = useState('all');
-  
+
   const categories = ['all', 'Database', 'Communication', 'Development', 'Finance', 'Cloud', 'Analytics', 'AI & ML', 'Productivity'];
   const protocols = ['all', 'MCP', 'OpenAI', 'LangChain', 'AutoGPT', 'Custom API'];
-  
+
   const filteredServers = servers.filter(server => {
     const matchesSearch = server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         server.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         server.description.toLowerCase().includes(searchQuery.toLowerCase());
+      server.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      server.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || server.category === selectedCategory;
     const matchesProtocol = selectedProtocol === 'all' || server.protocol === selectedProtocol;
     return matchesSearch && matchesCategory && matchesProtocol;
@@ -79,9 +82,7 @@ export function BrowseClient({ servers }: { servers: Server[] }) {
             className="px-4 py-2 border border-gray-300 rounded-md bg-white"
           >
             {protocols.map(proto => (
-              <option key={proto} value={proto}>
-                {proto === 'all' ? 'All Protocols' : proto}
-              </option>
+              <option key={proto} value={proto}>{proto === 'all' ? 'All Protocols' : proto}</option>
             ))}
           </select>
           <select
@@ -90,15 +91,11 @@ export function BrowseClient({ servers }: { servers: Server[] }) {
             className="px-4 py-2 border border-gray-300 rounded-md bg-white"
           >
             {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat === 'all' ? 'All Categories' : cat}
-              </option>
+              <option key={cat} value={cat}>{cat === 'all' ? 'All Categories' : cat}</option>
             ))}
           </select>
         </div>
-        <p className="text-sm text-gray-600">
-          Showing {filteredServers.length} of {servers.length} integrations
-        </p>
+        <p className="text-sm text-gray-600">Showing {filteredServers.length} of {servers.length} integrations</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -111,21 +108,15 @@ export function BrowseClient({ servers }: { servers: Server[] }) {
                     {CATEGORY_ICONS[server.category] ?? <Code2 className="w-6 h-6 text-white" />}
                   </div>
                   <div className="flex gap-1 flex-wrap">
-                    {server.isVerified && (
-                      <Badge variant="secondary" className="gap-1 text-xs">✓ Verified</Badge>
-                    )}
-                    <Badge variant="outline" className="text-xs">
-                      {server.protocol}
-                    </Badge>
+                    {server.isVerified && <Badge variant="secondary" className="text-xs">✓ Verified</Badge>}
+                    <Badge variant="outline" className="text-xs">{server.protocol}</Badge>
                   </div>
                 </div>
                 <CardTitle className="line-clamp-1">{server.name}</CardTitle>
                 <CardDescription className="line-clamp-1">{server.tagline}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600 line-clamp-2 mb-4">
-                  {server.description}
-                </p>
+                <p className="text-sm text-gray-600 line-clamp-2 mb-4">{server.description}</p>
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -142,7 +133,7 @@ export function BrowseClient({ servers }: { servers: Server[] }) {
           </Link>
         ))}
       </div>
-      
+
       {filteredServers.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">No integrations found matching your criteria.</p>

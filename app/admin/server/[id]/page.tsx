@@ -1,10 +1,11 @@
 import { notFound, redirect } from 'next/navigation';
-import { db } from '@/lib/db';
-import { mcpServers } from '@/lib/db/schema';
+import { db } from '../../../../lib/db';
+import { mcpServers } from '../../../../lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
+import { Button } from '../../../../components/ui/button';
+import { Badge } from '../../../../components/ui/badge';
+import { sendApprovalEmail } from '../../../../lib/email';
 
 async function getServer(id: string) {
   const servers = await db.select().from(mcpServers).where(eq(mcpServers.id, id));
@@ -14,9 +15,19 @@ async function getServer(id: string) {
 async function approveServer(formData: FormData) {
   'use server';
   const id = formData.get('id') as string;
-  await db.update(mcpServers)
-    .set({ status: 'approved' })
-    .where(eq(mcpServers.id, id));
+  const servers = await db.select().from(mcpServers).where(eq(mcpServers.id, id));
+  const server = servers[0];
+  if (server) {
+    await db.update(mcpServers).set({ status: 'approved' }).where(eq(mcpServers.id, id));
+    sendApprovalEmail({
+      authorName: server.authorName,
+      authorEmail: server.authorEmail,
+      name: server.name,
+      slug: server.slug,
+      isVerified: server.isVerified,
+      isFeatured: server.isFeatured,
+    }).catch(err => console.error('Approval email error:', err));
+  }
   redirect('/admin');
 }
 

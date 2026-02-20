@@ -43,7 +43,9 @@ export const reviews = pgTable('reviews', {
   id: uuid('id').defaultRandom().primaryKey(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   serverId: uuid('server_id').notNull(),
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id'),
+  reviewerName: varchar('reviewer_name', { length: 255 }),
+  reviewerEmail: varchar('reviewer_email', { length: 255 }),
   rating: integer('rating').notNull(),
   comment: text('comment'),
 });

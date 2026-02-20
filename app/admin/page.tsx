@@ -1,9 +1,9 @@
-import { db } from '@/lib/db';
-import { mcpServers } from '@/lib/db/schema';
+import { db } from '../../lib/db';
+import { mcpServers } from '../../lib/db/schema';
 import { desc } from 'drizzle-orm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
 import Link from 'next/link';
 
 async function getStats() {

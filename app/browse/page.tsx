@@ -1,8 +1,9 @@
-import { db } from '@/lib/db';
-import { mcpServers } from '@/lib/db/schema';
+import { db } from '../../lib/db';
+import { mcpServers } from '../../lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { BrowseClient } from './client-page';
-import { Nav } from '@/components/nav';
+import { Nav } from '../../components/nav';
+import { Suspense } from 'react';
 
 async function getServers() {
   return await db.select().from(mcpServers)
@@ -11,8 +12,13 @@ async function getServers() {
     .limit(100);
 }
 
-export default async function BrowsePage() {
+export default async function BrowsePage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
   const servers = await getServers();
+  const initialCategory = searchParams.category ?? 'all';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,9 +29,10 @@ export default async function BrowsePage() {
           <p className="text-gray-600">Discover production-ready integrations for GPT, Claude, LangChain, AutoGPT and more</p>
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <BrowseClient servers={servers} />
+        <Suspense fallback={<div className="text-gray-500">Loading...</div>}>
+          <BrowseClient servers={servers} initialCategory={initialCategory} />
+        </Suspense>
       </div>
     </div>
   );
