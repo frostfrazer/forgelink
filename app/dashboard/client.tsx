@@ -155,11 +155,18 @@ export function DashboardClient({ servers, userEmail }: { servers: Server[]; use
                   <p className="text-sm text-gray-500 truncate">{server.tagline}</p>
                 </div>
                 {server.status === 'approved' && (
-                  <Link href={`/server/${server.slug}`} target="_blank">
-                    <Button size="sm" variant="outline" className="gap-1 shrink-0">
-                      <ExternalLink className="w-3.5 h-3.5" /> View listing
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2 shrink-0">
+                    <Link href={`/dashboard/edit/${server.slug}`}>
+                      <Button size="sm" variant="outline" className="gap-1 shrink-0">
+                        ✏️ Edit
+                      </Button>
+                    </Link>
+                    <Link href={`/server/${server.slug}`} target="_blank">
+                      <Button size="sm" variant="outline" className="gap-1 shrink-0">
+                        <ExternalLink className="w-3.5 h-3.5" /> View
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </div>
 

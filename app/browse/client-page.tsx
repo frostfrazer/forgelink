@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
-import { Star, Download, Search, Database, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package, X, Tag } from 'lucide-react';
+import { Star, Download, Search, Database, Cloud, MessageSquare, Code2, BarChart2, DollarSign, Bot, Package, X, Tag, GitCompare } from 'lucide-react';
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Database':      <Database className="w-5 h-5 text-white" />,
@@ -72,6 +72,7 @@ export function BrowseClient({
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedProtocol, setSelectedProtocol] = useState(initialProtocol);
   const [selectedTag, setSelectedTag] = useState(initialTag);
+  const [compareSlug, setCompareSlug] = useState<string | null>(null);
 
   const pushUrl = useCallback((q: string, cat: string, proto: string, tag: string) => {
     const params = new URLSearchParams();
@@ -185,9 +186,16 @@ export function BrowseClient({
       </div>
 
       {/* Grid */}
+      {compareSlug && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 text-sm">
+          <GitCompare className="w-4 h-4 text-blue-400 shrink-0" />
+          <span>Comparing <strong>{filteredServers.find(s => s.slug === compareSlug)?.name}</strong> — pick another</span>
+          <button onClick={() => setCompareSlug(null)} className="text-gray-400 hover:text-white ml-2">✕</button>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredServers.map((server) => (
-          <Link key={server.id} href={`/server/${server.slug}`}>
+        <Link key={server.id} href={`/server/${server.slug}`}>
             <Card className="h-full hover:shadow-lg hover:border-blue-200 transition-all cursor-pointer group">
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
@@ -211,10 +219,27 @@ export function BrowseClient({
                     ))}
                   </div>
                 )}
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />{server.ratingAvg || '0.0'}</span>
-                  <span className="flex items-center gap-1"><Download className="w-4 h-4" />{(server.installCount ?? 0).toLocaleString()}</span>
-                  <Badge variant="outline" className="text-xs">{server.category}</Badge>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />{server.ratingAvg || '0.0'}</span>
+                    <span className="flex items-center gap-1"><Download className="w-4 h-4" />{(server.installCount ?? 0).toLocaleString()}</span>
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.preventDefault();
+                      if (compareSlug && compareSlug !== server.slug) {
+                        router.push(`/compare/${compareSlug}-vs-${server.slug}`);
+                        setCompareSlug(null);
+                      } else {
+                        setCompareSlug(compareSlug === server.slug ? null : server.slug);
+                      }
+                    }}
+                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-colors ${compareSlug === server.slug ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
+                    title="Compare this integration"
+                  >
+                    <GitCompare className="w-3.5 h-3.5" />
+                    {compareSlug && compareSlug !== server.slug ? 'Compare' : compareSlug === server.slug ? 'Selected' : 'Compare'}
+                  </button>
                 </div>
               </CardContent>
             </Card>
