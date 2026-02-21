@@ -41,15 +41,16 @@ export default function PricingPage() {
 
   const startCheckout = async (tier: string) => {
     setError('');
-    if (!activeForm) { setActiveForm(tier); return; }
+    if (!activeForm || activeForm !== tier) { setActiveForm(tier); return; }
     if (!email) { setError('Please enter your email address.'); return; }
+    if (!serverId.trim()) { setError('Please enter your integration ID so we know which listing to upgrade. Find it in your listing URL: /server/your-slug — use the slug as the ID, or contact support@forgelink.io if you need help.'); return; }
 
     setLoading(tier);
     try {
       const res = await fetch('/api/paystack/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, tier, serverId: serverId || 'new', serverName: serverName || 'My Integration' }),
+        body: JSON.stringify({ email, tier, serverId: serverId.trim(), serverName: serverName || 'My Integration' }),
       });
       const data = await res.json();
       if (data.url) {
@@ -100,9 +101,9 @@ export default function PricingPage() {
                 <Input placeholder="e.g. PostgreSQL MCP" value={serverName} onChange={e => setServerName(e.target.value)} />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-600 mb-1 block">Integration ID (optional)</label>
-                <Input placeholder="From your listing URL" value={serverId} onChange={e => setServerId(e.target.value)} />
-                <p className="text-xs text-gray-400 mt-1">Find this in your listing URL: /server/your-slug</p>
+                <label className="text-xs font-medium text-gray-600 mb-1 block">Integration ID <span className="text-red-500">*</span></label>
+                <Input placeholder="your-integration-slug" value={serverId} onChange={e => setServerId(e.target.value)} />
+                <p className="text-xs text-gray-400 mt-1">From your listing URL: forgelink-pi.vercel.app/server/<strong>your-slug</strong></p>
               </div>
               {error && <p className="text-xs text-red-500">{error}</p>}
             </div>

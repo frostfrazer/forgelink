@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { db } from '../../../../lib/db';
+import { mcpServers } from '../../../../lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? 'https://forgelink-pi.vercel.app';
@@ -31,7 +34,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment not configured' }, { status: 500 });
     }
 
-    const callbackUrl = `${APP_URL}/payment/success?server_id=${serverId}&tier=${tier}`;
+    // Resolve slug or UUID → actual server record
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(serverId);
+    const servers = await db.select({ id: mcpServers.id, name: mcpServers.name, slug: mcpServers.slug, status: mcpServers.status })
+      .from(mcpServers)
+      .where(isUuid ? eq(mcpServers.id, serverId) : eq(mcpServers.slug, serverId))
+      .limit(1);
+
+    const server = servers[0];
+    if (!server) {
+      return NextResponse.json({ error: `No integration found with ${isUuid ? 'ID' : 'slug'} "${serverId}". Please check your listing URL.` }, { status: 404 });
+    }
+
+    const resolvedId = server.id;
+    const resolvedName = serverName || server.name || 'My Integration';
+
+    const callbackUrl = `${APP_URL}/payment/success?server_id=${resolvedId}&tier=${tier}`;
 
     const res = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
@@ -41,17 +59,17 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         email,
-        amount,              // already in kobo/cents
+        amount,
         currency: 'USD',
         callback_url: callbackUrl,
         channels: ['card', 'bank', 'ussd', 'mobile_money'],
         metadata: {
-          serverId,
-          serverName: serverName ?? 'Unknown',
+          serverId: resolvedId,
+          serverName: resolvedName,
           tier,
           cancel_action: `${APP_URL}/pricing`,
           custom_fields: [
-            { display_name: 'Integration', variable_name: 'server_name', value: serverName ?? '' },
+            { display_name: 'Integration', variable_name: 'server_name', value: resolvedName },
             { display_name: 'Plan', variable_name: 'tier', value: tier },
           ],
         },
