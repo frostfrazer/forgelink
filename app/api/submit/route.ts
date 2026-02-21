@@ -59,10 +59,6 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    const tierNote = body.preferredTier === 'early-bird' ? ' [EARLY BIRD]' :
-                     body.preferredTier === 'verified' ? ' [VERIFIED $99]' :
-                     ' [FREE REVIEW]';
-
     const newServer = await db.insert(mcpServers).values({
       name: body.name,
       slug: slug,
@@ -74,7 +70,7 @@ export async function POST(request: Request) {
       npmPackage: body.npmPackage || null,
       installCommand: body.installCommand,
       authorName: body.authorName,
-      authorEmail: (body.authorEmail || '') + tierNote,
+      authorEmail: body.authorEmail || '',
       status: 'pending',
       isVerified: false,
       isFeatured: false,
