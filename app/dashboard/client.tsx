@@ -156,6 +156,13 @@ export function DashboardClient({ servers, userEmail }: { servers: Server[]; use
                 </div>
                 {server.status === 'approved' && (
                   <div className="flex gap-2 shrink-0">
+                    {server.isFeatured && (
+                      <Link href={`/dashboard/analytics/${server.slug}`}>
+                        <Button size="sm" variant="outline" className="gap-1 shrink-0 border-yellow-300 text-yellow-700 hover:bg-yellow-50">
+                          <TrendingUp className="w-3.5 h-3.5" /> Analytics
+                        </Button>
+                      </Link>
+                    )}
                     <Link href={`/dashboard/edit/${server.slug}`}>
                       <Button size="sm" variant="outline" className="gap-1 shrink-0">
                         ✏️ Edit
