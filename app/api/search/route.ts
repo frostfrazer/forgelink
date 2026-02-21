@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import { mcpServers } from '../../../lib/db/schema';
-import { eq, ilike, or, desc } from 'drizzle-orm';
+import { eq, ilike, or, desc, and } from 'drizzle-orm';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -23,10 +23,13 @@ export async function GET(req: Request) {
   })
     .from(mcpServers)
     .where(
-      or(
-        ilike(mcpServers.name, pattern),
-        ilike(mcpServers.tagline, pattern),
-        ilike(mcpServers.category, pattern),
+      and(
+        eq(mcpServers.status, 'approved'),
+        or(
+          ilike(mcpServers.name, pattern),
+          ilike(mcpServers.tagline, pattern),
+          ilike(mcpServers.category, pattern),
+        )
       ) as any
     )
     .orderBy(desc(mcpServers.installCount))
