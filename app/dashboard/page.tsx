@@ -44,6 +44,7 @@ export default async function DashboardPage() {
     ...s,
     tags: tagMap[s.id] ?? [],
     weeklyGrowth: (s.viewCount ?? 0) - (s.weeklyViewSnapshot ?? 0),
+    featuredExpiresAt: s.featuredExpiresAt ?? null,
   }));
 
   return (

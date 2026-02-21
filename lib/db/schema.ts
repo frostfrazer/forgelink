@@ -35,6 +35,7 @@ export const mcpServers = pgTable('mcp_servers', {
   ownerEmail: varchar('owner_email', { length: 255 }),
   weeklyViewSnapshot: integer('weekly_view_snapshot').default(0),
   weeklySnapshotAt: timestamp('weekly_snapshot_at'),
+  featuredExpiresAt: timestamp('featured_expires_at'),
 });
 
 export const categories = pgTable('categories', {

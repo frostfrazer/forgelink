@@ -19,6 +19,7 @@ type Server = {
   weeklyGrowth: number;
   tags: string[];
   createdAt: Date;
+  featuredExpiresAt: Date | null;
 };
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -219,9 +220,24 @@ export function DashboardClient({ servers, userEmail }: { servers: Server[]; use
               )}
 
               {server.isFeatured && (
-                <div className="rounded-xl p-3 bg-green-50 border border-green-200 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                  <p className="text-sm text-green-800 font-medium">Featured listing active — you're in the homepage carousel and top of browse.</p>
+                <div className="rounded-xl p-3 bg-green-50 border border-green-200 flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+                    <p className="text-sm text-green-800 font-medium">Featured listing active — homepage carousel + top of browse.</p>
+                  </div>
+                  {server.featuredExpiresAt && (() => {
+                    const daysLeft = Math.ceil((new Date(server.featuredExpiresAt!).getTime() - Date.now()) / 86400000);
+                    const urgent = daysLeft <= 7;
+                    return (
+                      <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full ${urgent ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                        <Clock className="w-3.5 h-3.5" />
+                        {daysLeft > 0 ? `${daysLeft}d left` : 'Expiring today'}
+                        {urgent && (
+                          <Link href={`/pricing?serverId=${server.slug}`} className="underline ml-1">Renew →</Link>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

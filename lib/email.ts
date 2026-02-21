@@ -176,3 +176,91 @@ export async function sendReviewNotification(data: {
     </div>`
   );
 }
+
+// ─── 5. Payment confirmation ──────────────────────────────────────────────────
+export async function sendPaymentConfirmation(data: {
+  email: string; serverName: string; tier: string; serverId: string;
+}) {
+  const tierLabel = data.tier === 'verified' ? 'Verified Badge ($99 one-time)' : 'Featured Listing ($199/mo)';
+  const tierNote = data.tier === 'featured'
+    ? '<p style="color:#475569;font-size:14px;margin-top:8px">Your Featured listing is active for <strong>30 days</strong>. You\'ll receive a renewal reminder before it expires.</p>'
+    : '';
+
+  await send(
+    data.email,
+    `Payment confirmed — ${tierLabel} activated`,
+    `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:20px 24px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;margin:0;font-size:18px">⚡ ForgeLink</h1>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+        <h2 style="margin:0 0 8px;font-size:20px">Payment Confirmed ✓</h2>
+        <p style="color:#475569">Thanks for upgrading <strong>${data.serverName}</strong>!</p>
+        <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:6px 0;color:#64748b">Plan</td><td style="padding:6px 0;font-weight:600">${tierLabel}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b">Integration</td><td style="padding:6px 0;font-weight:600">${data.serverName}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748b">Status</td><td style="padding:6px 0;color:#16a34a;font-weight:600">Active ✓</td></tr>
+          </table>
+        </div>
+        ${tierNote}
+        <a href="${APP_URL}/dashboard"
+           style="display:inline-block;margin-top:16px;background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+          View dashboard →
+        </a>
+        <p style="color:#94a3b8;font-size:13px;margin-top:24px">Questions? Reply to this email. — ForgeLink Team</p>
+      </div>
+    </div>`
+  );
+}
+
+// ─── 6. Featured expiry warning (7 days before) ──────────────────────────────
+export async function sendFeaturedExpiryWarning(data: {
+  email: string; serverName: string; slug: string; daysLeft: number;
+}) {
+  await send(
+    data.email,
+    `⚠️ Your Featured listing expires in ${data.daysLeft} day${data.daysLeft !== 1 ? 's' : ''}`,
+    `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:20px 24px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;margin:0;font-size:18px">⚡ ForgeLink</h1>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+        <h2 style="margin:0 0 8px;font-size:20px">Featured listing expiring soon</h2>
+        <p style="color:#475569">Your Featured listing for <strong>${data.serverName}</strong> expires in <strong>${data.daysLeft} day${data.daysLeft !== 1 ? 's' : ''}</strong>.</p>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:16px 0">
+          <p style="color:#92400e;margin:0;font-size:14px">When it expires, your listing will revert to Verified tier and lose homepage carousel and top browse placement.</p>
+        </div>
+        <a href="${APP_URL}/pricing?serverId=${data.slug}"
+           style="display:inline-block;background:#f59e0b;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+          Renew Featured ($199/mo) →
+        </a>
+        <p style="color:#94a3b8;font-size:13px;margin-top:24px">— ForgeLink Team</p>
+      </div>
+    </div>`
+  );
+}
+
+// ─── 7. Featured expired notification ────────────────────────────────────────
+export async function sendFeaturedExpiredNotice(data: {
+  email: string; serverName: string; slug: string;
+}) {
+  await send(
+    data.email,
+    `Your Featured listing has expired — ${data.serverName}`,
+    `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#6b7280,#4b5563);padding:20px 24px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;margin:0;font-size:18px">⚡ ForgeLink</h1>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+        <h2 style="margin:0 0 8px;font-size:20px">Featured listing expired</h2>
+        <p style="color:#475569"><strong>${data.serverName}</strong> has reverted to Verified tier. It's still live and searchable, but no longer in the homepage carousel or top of browse.</p>
+        <a href="${APP_URL}/pricing?serverId=${data.slug}"
+           style="display:inline-block;margin-top:16px;background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+          Renew Featured ($199/mo) →
+        </a>
+        <p style="color:#94a3b8;font-size:13px;margin-top:24px">— ForgeLink Team</p>
+      </div>
+    </div>`
+  );
+}
