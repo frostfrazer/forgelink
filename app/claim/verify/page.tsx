@@ -55,7 +55,7 @@ export default function ClaimVerifyPage() {
     const data = await res.json();
     if (data.success) {
       setStatus('saved');
-      setTimeout(() => router.push(`/server/${server?.slug}`), 2000);
+      setTimeout(() => router.push('/dashboard'), 2000);
     } else {
       setStatus('valid');
       setError(data.error ?? 'Save failed.');
@@ -85,8 +85,8 @@ export default function ClaimVerifyPage() {
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">✓</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Listing Updated!</h1>
-            <p className="text-gray-500">Redirecting to your listing...</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Listing Claimed!</h1>
+            <p className="text-gray-500">You now own this listing. Redirecting to your dashboard...</p>
           </div>
         )}
 

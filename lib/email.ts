@@ -264,3 +264,28 @@ export async function sendFeaturedExpiredNotice(data: {
     </div>`
   );
 }
+
+// ─── 8. Claim verification email ─────────────────────────────────────────────
+export async function sendClaimEmail(data: {
+  email: string; serverName: string; claimUrl: string;
+}) {
+  await send(
+    data.email,
+    `Claim your ForgeLink listing: ${data.serverName}`,
+    `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:20px 24px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;margin:0;font-size:18px">⚡ ForgeLink</h1>
+      </div>
+      <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 12px 12px;padding:24px">
+        <h2 style="margin:0 0 8px;font-size:20px">Claim your listing</h2>
+        <p style="color:#475569">Click below to verify you own <strong>${data.serverName}</strong> and get full access to edit, manage, and track analytics.</p>
+        <a href="${data.claimUrl}"
+           style="display:inline-block;margin:20px 0;background:#2563eb;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+          Verify & Claim Listing →
+        </a>
+        <p style="color:#94a3b8;font-size:13px">This link expires in 24 hours. If you didn't request this, you can safely ignore this email.</p>
+        <p style="color:#cbd5e1;font-size:12px;word-break:break-all">Or copy: ${data.claimUrl}</p>
+      </div>
+    </div>`
+  );
+}
