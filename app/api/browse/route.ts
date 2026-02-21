@@ -3,7 +3,7 @@ import { db } from '../../../lib/db';
 import { mcpServers, serverTags } from '../../../lib/db/schema';
 import { eq, desc, ilike, or, and, inArray } from 'drizzle-orm';
 
-export const PAGE_SIZE = 12;
+const PAGE_SIZE = 12;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
