@@ -1,33 +1,42 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import { reviews, mcpServers } from '../../../lib/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   try {
-    const { serverId, rating, comment } = await request.json();
+    const { serverId, rating, comment, reviewerName } = await request.json();
 
     if (!serverId || !rating || rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    // Insert review (userId is anonymous for now)
+    // Verify the server exists and is approved
+    const servers = await db.select({ id: mcpServers.id })
+      .from(mcpServers)
+      .where(eq(mcpServers.id, serverId))
+      .limit(1);
+
+    if (!servers[0]) {
+      return NextResponse.json({ error: 'Server not found' }, { status: 404 });
+    }
+
     await db.insert(reviews).values({
       serverId,
-      userId: '00000000-0000-0000-0000-000000000000', // anonymous
       rating,
-      comment: comment || null,
+      comment: comment?.trim() || null,
+      reviewerName: reviewerName?.trim() || 'Anonymous',
     });
 
-    // Recalculate avg rating on the server
-    const allReviews = await db.select().from(reviews).where(eq(reviews.serverId, serverId));
+    // Recalculate avg rating
+    const allReviews = await db.select({ rating: reviews.rating })
+      .from(reviews)
+      .where(eq(reviews.serverId, serverId));
+
     const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
     await db.update(mcpServers)
-      .set({
-        ratingAvg: avg.toFixed(1),
-        ratingCount: allReviews.length,
-      })
+      .set({ ratingAvg: avg.toFixed(2), ratingCount: allReviews.length })
       .where(eq(mcpServers.id, serverId));
 
     return NextResponse.json({ success: true });

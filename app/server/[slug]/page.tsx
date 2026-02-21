@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const server = servers[0];
   if (!server) return { title: 'Not Found' };
   const url = `https://forgelink-pi.vercel.app/server/${server.slug}`;
+  const ogImage = `https://forgelink-pi.vercel.app/server/${server.slug}/opengraph-image`;
   return {
     title: `${server.name} — ${server.category} Integration | ForgeLink`,
     description: server.tagline,
@@ -30,12 +31,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: 'website',
       url,
       siteName: 'ForgeLink',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: server.name }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${server.name} | ForgeLink`,
       description: server.tagline,
       site: '@forgelink',
+      images: [ogImage],
     },
   };
 }
