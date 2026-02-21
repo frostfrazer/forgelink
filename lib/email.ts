@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM = 'ForgeLink <noreply@forgelink.io>';
+const FROM = 'ForgeLink <onboarding@resend.dev>';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://forgelink-pi.vercel.app';
 
 async function send(to: string, subject: string, html: string) {
