@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import { reviews, mcpServers } from '../../../lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { sendReviewNotification } from '../../../lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +13,13 @@ export async function POST(request: Request) {
     }
 
     // Verify the server exists and is approved
-    const servers = await db.select({ id: mcpServers.id })
+    const servers = await db.select({
+      id: mcpServers.id,
+      name: mcpServers.name,
+      slug: mcpServers.slug,
+      authorEmail: mcpServers.authorEmail,
+      ownerEmail: mcpServers.ownerEmail,
+    })
       .from(mcpServers)
       .where(eq(mcpServers.id, serverId))
       .limit(1);
@@ -38,6 +45,21 @@ export async function POST(request: Request) {
     await db.update(mcpServers)
       .set({ ratingAvg: avg.toFixed(2), ratingCount: allReviews.length })
       .where(eq(mcpServers.id, serverId));
+
+    // Notify owner — fire and forget
+    const ownerEmail = servers[0] && (
+      (servers[0] as any).ownerEmail || (servers[0] as any).authorEmail
+    );
+    if (ownerEmail) {
+      sendReviewNotification({
+        ownerEmail,
+        serverName: (servers[0] as any).name,
+        slug: (servers[0] as any).slug,
+        reviewerName: reviewerName?.trim() || 'Anonymous',
+        rating,
+        comment: comment?.trim() || null,
+      }).catch(err => console.error('[review notify]', err));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
