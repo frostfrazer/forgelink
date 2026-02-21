@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { createClient } from '../../lib/supabase/server';
 import { db } from '../../lib/db';
 import { mcpServers, serverTags } from '../../lib/db/schema';
@@ -48,7 +49,9 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
-      <DashboardClient servers={enriched} userEmail={email} />
+      <Suspense fallback={<div className="max-w-5xl mx-auto px-4 py-10 text-gray-400">Loading…</div>}>
+        <DashboardClient servers={enriched} userEmail={email} />
+      </Suspense>
     </div>
   );
 }

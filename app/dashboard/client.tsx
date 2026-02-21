@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -74,6 +75,8 @@ function StatCard({ icon: Icon, label, value, sub, color }: {
 }
 
 export function DashboardClient({ servers, userEmail }: { servers: Server[]; userEmail: string }) {
+  const searchParams = useSearchParams();
+  const isUnauthorized = searchParams.get('error') === 'unauthorized';
   const approved = servers.filter(s => s.status === 'approved');
   const totalViews = servers.reduce((a, s) => a + (s.viewCount ?? 0), 0);
   const totalInstalls = servers.reduce((a, s) => a + (s.installCount ?? 0), 0);
@@ -84,6 +87,16 @@ export function DashboardClient({ servers, userEmail }: { servers: Server[]; use
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
+
+      {/* Unauthorized banner */}
+      {isUnauthorized && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl px-5 py-4 flex items-center gap-3">
+          <XCircle className="w-5 h-5 text-red-500 shrink-0" />
+          <p className="text-sm text-red-700 font-medium">
+            Access denied — your account doesn't have admin privileges.
+          </p>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
