@@ -34,7 +34,12 @@ const plans = [
 export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [email, setEmail] = useState('');
-  const [serverId, setServerId] = useState('');
+  const [serverId, setServerId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('serverId') ?? '';
+    }
+    return '';
+  });
   const [serverName, setServerName] = useState('');
   const [activeForm, setActiveForm] = useState<string | null>(null);
   const [error, setError] = useState('');

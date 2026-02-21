@@ -28,6 +28,9 @@ export function Nav() {
             <Link href="/pricing" className="text-gray-600 hover:text-gray-900 font-medium text-sm hidden md:block">
               Pricing
             </Link>
+            <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 font-medium text-sm hidden md:block">
+              Dashboard
+            </Link>
             <Link href="/auth/signin" className="text-gray-600 hover:text-gray-900 font-medium text-sm hidden md:block">
               Sign In
             </Link>
