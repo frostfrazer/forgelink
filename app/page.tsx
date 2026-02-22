@@ -85,19 +85,33 @@ export default async function Home() {
   ]);
 
   const categories = [
-    { icon: 'Database',      name: 'Database',      color: 'from-blue-500 to-blue-700',    href: '/browse?category=Database' },
-    { icon: 'Development',   name: 'Development',   color: 'from-gray-600 to-gray-800',    href: '/browse?category=Development' },
-    { icon: 'Productivity',  name: 'Productivity',  color: 'from-yellow-500 to-yellow-700',href: '/browse?category=Productivity' },
-    { icon: 'Cloud',         name: 'Cloud',         color: 'from-purple-500 to-purple-700',href: '/browse?category=Cloud' },
-    { icon: 'Communication', name: 'Communication', color: 'from-green-500 to-green-700',  href: '/browse?category=Communication' },
-    { icon: 'Finance',       name: 'Finance',       color: 'from-emerald-500 to-emerald-700', href: '/browse?category=Finance' },
-    { icon: 'AI & ML',       name: 'AI & ML',       color: 'from-pink-500 to-pink-700',    href: '/browse?category=AI+%26+ML' },
-    { icon: 'Analytics',     name: 'Analytics',     color: 'from-orange-500 to-orange-700',href: '/browse?category=Analytics' },
+    { icon: 'Database',      name: 'Database',      color: 'from-blue-500 to-blue-700',    href: '/category/database' },
+    { icon: 'Development',   name: 'Development',   color: 'from-gray-600 to-gray-800',    href: '/category/development' },
+    { icon: 'Productivity',  name: 'Productivity',  color: 'from-yellow-500 to-yellow-700',href: '/category/productivity' },
+    { icon: 'Cloud',         name: 'Cloud',         color: 'from-purple-500 to-purple-700',href: '/category/cloud' },
+    { icon: 'Communication', name: 'Communication', color: 'from-green-500 to-green-700',  href: '/category/communication' },
+    { icon: 'Finance',       name: 'Finance',       color: 'from-emerald-500 to-emerald-700', href: '/category/finance' },
+    { icon: 'AI & ML',       name: 'AI & ML',       color: 'from-pink-500 to-pink-700',    href: '/category/ai-ml' },
+    { icon: 'Analytics',     name: 'Analytics',     color: 'from-orange-500 to-orange-700',href: '/category/analytics' },
   ];
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'ForgeLink',
+    url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://forgelink-pi.vercel.app',
+    description: 'The premier marketplace for AI agent integrations — MCP servers, GPT Actions, LangChain tools, and AutoGPT plugins.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://forgelink-pi.vercel.app'}/browse?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  };
 
   return (
     <div className="min-h-screen bg-white">
       <Nav />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-white py-20 sm:py-28">
@@ -265,10 +279,10 @@ export default async function Home() {
             <div>
               <h4 className="text-white font-semibold mb-3">Categories</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/browse?category=Database" className="hover:text-white">Database</Link></li>
-                <li><Link href="/browse?category=Development" className="hover:text-white">Development</Link></li>
-                <li><Link href="/browse?category=Analytics" className="hover:text-white">Analytics</Link></li>
-                <li><Link href="/browse?category=AI+%26+ML" className="hover:text-white">AI & ML</Link></li>
+                <li><Link href="/category/database" className="hover:text-white">Database</Link></li>
+                <li><Link href="/category/development" className="hover:text-white">Development</Link></li>
+                <li><Link href="/category/analytics" className="hover:text-white">Analytics</Link></li>
+                <li><Link href="/category/ai-ml" className="hover:text-white">AI & ML</Link></li>
               </ul>
             </div>
             <div>

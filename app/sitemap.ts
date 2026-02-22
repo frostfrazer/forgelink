@@ -18,6 +18,16 @@ export default async function sitemap() {
     { url: `${APP_URL}/pricing`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.7 },
   ];
 
+  const categoryRoutes = [
+    'database', 'development', 'communication', 'productivity',
+    'cloud', 'finance', 'ai-ml', 'analytics',
+  ].map(slug => ({
+    url: `${APP_URL}/category/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: 0.85,
+  }));
+
   const serverRoutes = servers.map(s => ({
     url: `${APP_URL}/server/${s.slug}`,
     lastModified: s.updatedAt,
@@ -45,5 +55,5 @@ export default async function sitemap() {
     }
   }
 
-  return [...staticRoutes, ...serverRoutes, ...compareRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...serverRoutes, ...compareRoutes];
 }
